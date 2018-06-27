@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+	"sync"
 
 	"github.com/coreos/dex/storage"
 	"github.com/lib/pq"
@@ -51,7 +52,7 @@ func (s *SQLite3) open(logger logrus.FieldLogger) (*conn, error) {
 		return sqlErr.ExtendedCode == sqlite3.ErrConstraintPrimaryKey
 	}
 
-	c := &conn{db, flavorSQLite3, logger, errCheck}
+	c := &conn{db, flavorSQLite3, logger, errCheck, &sync.Mutex{}}
 	if _, err := c.migrate(); err != nil {
 		return nil, fmt.Errorf("failed to perform migrations: %v", err)
 	}
@@ -139,7 +140,7 @@ func (p *Postgres) open(logger logrus.FieldLogger) (*conn, error) {
 		return sqlErr.Code == pgErrUniqueViolation
 	}
 
-	c := &conn{db, flavorPostgres, logger, errCheck}
+	c := &conn{db, flavorPostgres, logger, errCheck, &sync.Mutex{}}
 	if _, err := c.migrate(); err != nil {
 		return nil, fmt.Errorf("failed to perform migrations: %v", err)
 	}

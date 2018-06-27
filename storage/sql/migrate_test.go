@@ -3,6 +3,7 @@ package sql
 import (
 	"database/sql"
 	"os"
+	"sync"
 	"testing"
 
 	sqlite3 "github.com/mattn/go-sqlite3"
@@ -30,7 +31,7 @@ func TestMigrate(t *testing.T) {
 		return sqlErr.ExtendedCode == sqlite3.ErrConstraintUnique
 	}
 
-	c := &conn{db, flavorSQLite3, logger, errCheck}
+	c := &conn{db, flavorSQLite3, logger, errCheck, &sync.Mutex{}}
 	for _, want := range []int{len(migrations), 0} {
 		got, err := c.migrate()
 		if err != nil {

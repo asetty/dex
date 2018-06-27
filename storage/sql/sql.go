@@ -4,6 +4,7 @@ package sql
 import (
 	"database/sql"
 	"regexp"
+	"sync"
 	"time"
 
 	"github.com/cockroachdb/cockroach-go/crdb"
@@ -135,6 +136,7 @@ type conn struct {
 	flavor             flavor
 	logger             logrus.FieldLogger
 	alreadyExistsCheck func(err error) bool
+	updateMutex        *sync.Mutex
 }
 
 func (c *conn) Close() error {
