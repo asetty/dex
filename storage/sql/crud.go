@@ -134,6 +134,8 @@ func (c *conn) CreateAuthRequest(a storage.AuthRequest) error {
 }
 
 func (c *conn) UpdateAuthRequest(id string, updater func(a storage.AuthRequest) (storage.AuthRequest, error)) error {
+	c.updateMutex.Lock()
+	defer c.updateMutex.Unlock()
 	return c.ExecTx(func(tx *trans) error {
 		r, err := getAuthRequest(tx, id)
 		if err != nil {
@@ -275,6 +277,8 @@ func (c *conn) CreateRefresh(r storage.RefreshToken) error {
 }
 
 func (c *conn) UpdateRefreshToken(id string, updater func(old storage.RefreshToken) (storage.RefreshToken, error)) error {
+	c.updateMutex.Lock()
+	defer c.updateMutex.Unlock()
 	return c.ExecTx(func(tx *trans) error {
 		r, err := getRefresh(tx, id)
 		if err != nil {
@@ -375,6 +379,8 @@ func scanRefresh(s scanner) (r storage.RefreshToken, err error) {
 }
 
 func (c *conn) UpdateKeys(updater func(old storage.Keys) (storage.Keys, error)) error {
+	c.updateMutex.Lock()
+	defer c.updateMutex.Unlock()
 	return c.ExecTx(func(tx *trans) error {
 		firstUpdate := false
 		// TODO(ericchiang): errors may cause a transaction be rolled back by the SQL
@@ -451,6 +457,8 @@ func getKeys(q querier) (keys storage.Keys, err error) {
 }
 
 func (c *conn) UpdateClient(id string, updater func(old storage.Client) (storage.Client, error)) error {
+	c.updateMutex.Lock()
+	defer c.updateMutex.Unlock()
 	return c.ExecTx(func(tx *trans) error {
 		cli, err := getClient(tx, id)
 		if err != nil {
@@ -570,6 +578,8 @@ func (c *conn) CreatePassword(p storage.Password) error {
 }
 
 func (c *conn) UpdatePassword(email string, updater func(p storage.Password) (storage.Password, error)) error {
+	c.updateMutex.Lock()
+	defer c.updateMutex.Unlock()
 	return c.ExecTx(func(tx *trans) error {
 		p, err := getPassword(tx, email)
 		if err != nil {
@@ -665,6 +675,8 @@ func (c *conn) CreateOfflineSessions(s storage.OfflineSessions) error {
 }
 
 func (c *conn) UpdateOfflineSessions(userID string, connID string, updater func(s storage.OfflineSessions) (storage.OfflineSessions, error)) error {
+	c.updateMutex.Lock()
+	defer c.updateMutex.Unlock()
 	return c.ExecTx(func(tx *trans) error {
 		s, err := getOfflineSessions(tx, userID, connID)
 		if err != nil {
@@ -738,6 +750,8 @@ func (c *conn) CreateConnector(connector storage.Connector) error {
 }
 
 func (c *conn) UpdateConnector(id string, updater func(s storage.Connector) (storage.Connector, error)) error {
+	c.updateMutex.Lock()
+	defer c.updateMutex.Unlock()
 	return c.ExecTx(func(tx *trans) error {
 		connector, err := getConnector(tx, id)
 		if err != nil {
