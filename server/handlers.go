@@ -720,6 +720,7 @@ func (s *Server) sendCodeResponse(w http.ResponseWriter, r *http.Request, authRe
 
 func (s *Server) handleToken(w http.ResponseWriter, r *http.Request) {
 	clientID, clientSecret, ok := r.BasicAuth()
+	s.logger.Infof("handleToken request=%+v", *r)
 	if ok {
 		var err error
 		if clientID, err = url.QueryUnescape(clientID); err != nil {
@@ -734,13 +735,14 @@ func (s *Server) handleToken(w http.ResponseWriter, r *http.Request) {
 		clientID = r.PostFormValue("client_id")
 		clientSecret = r.PostFormValue("client_secret")
 	}
-
+	s.logger.Infof("handleToken: client_id=%s, client_secret=%s", clientID, clientSecret)
 	client, err := s.storage.GetClient(clientID)
 	if err != nil {
 		if err != storage.ErrNotFound {
 			s.logger.Errorf("failed to get client: %v", err)
 			s.tokenErrHelper(w, errServerError, "", http.StatusInternalServerError)
 		} else {
+			s.logger.Errorf("client credentials not found: %v", err)
 			s.tokenErrHelper(w, errInvalidClient, "Invalid client credentials.", http.StatusUnauthorized)
 		}
 		return
